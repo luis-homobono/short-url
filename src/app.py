@@ -1,18 +1,14 @@
 from crypt import methods
 from flask import Flask, render_template, flash, url_for, request, redirect, jsonify
 from flask_mysql_connector import MySQL
-import mysqlx
+from config import DevConfig
 import shortuuid
 
 app = Flask(__name__)
+app.config.from_object(DevConfig)
 
 # endpoint = "http://short.url"
 endpoint = "http://localhost"
-
-app.config["MYSQL_HOST"] = "localhost"
-app.config["MYSQL_USER"] = "****"
-app.config["MYSQL_PASSWORD"] = "*****"
-app.config["MYSQL_DATABASE"] = "db_enlaces_cortos"
 
 mysql = MySQL(app)
 
@@ -30,7 +26,12 @@ def create_url_short():
             url = request.form["url"]
             cursor = mysql.connection.cursor()
 
-            short_url = shortuuid.ShortUUID().random(length=7)
+            while True:
+                short_url = shortuuid.ShortUUID().random(length=7)
+                cursor.execute('SELECT * FROM enlaces WHERE enlace_corto = BINARY %s', (short_url))
+
+                if not cursor.fetchone():
+                    break
 
             cursor.execute("INSERT INTO enlaces (url, enlace_corto) VALUES (%s, %s)", (url, short_url))
 
@@ -39,8 +40,8 @@ def create_url_short():
 
             new_url = endpoint + "/" + short_url
             return jsonify(respuesta=new_url)
-    except:
-        return jsonify(respuesta="Error en petición"), 500
+    except Exception as e:
+        return jsonify(respuesta=f"Error en petición {e}"), 500
 
 if __name__ == "__main__":
     app.run(port=80, debug=True)
