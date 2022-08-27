@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="d-flex flex-column justify-content-center">
+    <div class="d-flex justify-content-center">
+        <img src="" alt="Banner" style="max-width: 60%;">
+    </div>
+    <div class="card card-body p-5 mt-5">
+        {% with nueva_url = get_flashed_messages() %}
+        {% if not nueva_url %}
+        <form action="{{ url_for('create_url_short') }}" method="post">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon3" style="border-radius: 10px;">Ingresa URL</span>
+                <input type="text" class="form-control ms-2" style="border-radius: 10px;"
+                    pattern="^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$"
+                    name="url" title="URL no valida" required />
+                <button class="btn btn-primary ms-2" style="border-radius: 10px;" type="submit">Cortar URL</button>
+            </div>
+        </form>
+        {% else %}
+        <div class="input-group mb-3">
+            <input id="newURL" type="text" class="form-control ms-2" style="border-radius: 10px;"
+                value="{{ nueva_url[0] }}" />
+            <button id="btnCopy" onclick="copyURL()" class="btn btn-outline-success ms-2"
+                style="border-radius: 10px;">Copiar URL</button>
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+{% endblock %}
